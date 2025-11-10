@@ -1,0 +1,61 @@
+name: 'Check TLS/SSL Rating'
+description: 'Check TLS/SSL cipher strength rating using nmap'
+inputs:
+  url:
+    description: 'URL to check (without https://)'
+    required: true
+  port:
+    description: 'Port to check'
+    required: false
+    default: '443'
+  required-rating:
+    description: 'Required minimum rating (A, B, C, D, E, F)'
+    required: false
+    default: 'A'
+outputs:
+  rating:
+    description: 'The SSL/TLS rating result'
+runs:
+  using: 'composite'
+  steps:
+    - name: Check SSL/TLS Rating
+      shell: bash
+      run: |
+        echo "Checking SSL/TLS rating for ${{ inputs.url }}:${{ inputs.port }}"
+        
+        # Install nmap if not available
+        if ! command -v nmap &> /dev/null; then
+          echo "Installing nmap..."
+          sudo apt-get update -qq
+          sudo apt-get install -y nmap
+        fi
+        
+        # Run nmap scan and extract rating
+        echo "Running nmap scan..."
+        SCAN_OUTPUT=$(nmap --script ssl-enum-ciphers -p ${{ inputs.port }} ${{ inputs.url }} 2>&1)
+        echo "$SCAN_OUTPUT"
+        
+        RATING=$(echo "$SCAN_OUTPUT" | grep "least strength: " | awk -F 'least strength: ' '{print $2}')
+        
+        if [ -z "$RATING" ]; then
+          echo "Error: Could not determine SSL/TLS rating"
+          echo "rating=UNKNOWN" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        echo "SSL/TLS Rating: $RATING"
+        echo "rating=$RATING" >> $GITHUB_OUTPUT
+        
+        # Check if rating meets requirements
+        REQUIRED="${{ inputs.required-rating }}"
+        
+        if [ "$RATING" = "$REQUIRED" ]; then
+          echo "✓ Rating $RATING meets requirement ($REQUIRED)"
+          exit 0
+        elif [ "$RATING" = "A" ]; then
+          echo "✓ Rating is A (highest rating)"
+          exit 0
+        else
+          echo "✗ Rating $RATING does not meet requirement (expected: $REQUIRED)"
+          exit 1
+        fi
