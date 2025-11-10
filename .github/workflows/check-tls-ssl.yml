@@ -10,6 +10,8 @@ jobs:
   check-tls-ssl:
     runs-on: ubuntu-latest
     name: Check TLS/SSL Ratings
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout
