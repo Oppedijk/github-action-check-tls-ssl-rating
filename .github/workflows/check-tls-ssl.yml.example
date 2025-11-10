@@ -1,0 +1,56 @@
+# Example: Checking Multiple Domains
+#
+# This is an example workflow that shows how to check multiple domains.
+# Copy this content to .github/workflows/check-tls-ssl.yml to replace 
+# the default configuration.
+
+name: Nightly TLS/SSL Check
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  check-tls-ssl:
+    runs-on: ubuntu-latest
+    name: Check TLS/SSL Ratings
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # Example 1: Check primary domain
+      - name: Check scan.homeqgo.nl
+        uses: ./
+        with:
+          url: 'scan.homeqgo.nl'
+          port: '443'
+          required-rating: 'A'
+      
+      # Example 2: Check another domain
+      - name: Check example.com
+        uses: ./
+        with:
+          url: 'example.com'
+          port: '443'
+          required-rating: 'A'
+      
+      # Example 3: Check with different port
+      - name: Check api.example.com
+        uses: ./
+        with:
+          url: 'api.example.com'
+          port: '8443'
+          required-rating: 'A'
+      
+      # Example 4: Accept lower rating (B or higher)
+      - name: Check legacy.example.com
+        uses: ./
+        with:
+          url: 'legacy.example.com'
+          port: '443'
+          required-rating: 'B'

@@ -1,0 +1,16 @@
+# Temporary files
+*.tmp
+*.log
+
+# Test files
+test-*.sh
+
+# macOS
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
