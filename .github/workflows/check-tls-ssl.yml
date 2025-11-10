@@ -17,9 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Check scan.homeqgo.nl
+      - name: Check Website for TLS/SSL rating
         uses: ./
         with:
-          url: 'scan.homeqgo.nl'
+          url: 'www.oppedijk.com'
           port: '443'
           required-rating: 'A'
